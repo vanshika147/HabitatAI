@@ -1,0 +1,10 @@
+
+{
+  "mcpServers": {
+    "git": {
+      "transport": "stdio",
+      "command": "python",
+      "args": ["-m", "mcp_server_git", "--repository", "D:\\Projects\\HabitatAI\\codebase_data\\PurePill-habitatAI"]
+    }
+  }
+}
