@@ -106,12 +106,39 @@ def github_create_issue(title: str, body: str) -> str:
 
 
 @tool
-def github_create_pull_request(title: str, body: str, head_branch: str, base_branch: str = "main") -> str:
-    """Creates a pull request on test-habitatai/PurePill-habitatAI."""
+def github_create_pull_request(
+    title: str,
+    body: str,
+    head_branch: str = "habitat-dev",
+    base_branch: str = "main",
+) -> str:
+    """Creates a pull request or returns the active pull request if one is already open for head_branch."""
     try:
         repo = _get_github_repo()
-        pr = repo.create_pull_request(title=title, body=body, head=head_branch, base=base_branch)
-        return f"Pull request opened successfully: #{pr.number} - {pr.html_url}"
+        owner = repo.owner.login
+        head_ref = f"{owner}:{head_branch}" if ":" not in head_branch else head_branch
+
+        # Check if an open PR already exists for this head branch
+        open_prs = repo.get_pulls(state="open", base=base_branch)
+        for pr in open_prs:
+            if pr.head.ref == head_branch or pr.head.label == head_ref:
+                return (
+                    f"Active pull request already exists for '{head_branch}': "
+                    f"#{pr.number} - {pr.html_url}. New commits on '{head_branch}' "
+                    "are automatically tracked."
+                )
+
+        # If no active PR, create a new one
+        try:
+            new_pr = repo.create_pull(
+                title=title, body=body, head=head_ref, base=base_branch
+            )
+        except Exception:
+            new_pr = repo.create_pull(
+                title=title, body=body, head=head_branch, base=base_branch
+            )
+
+        return f"Pull request opened successfully: #{new_pr.number} - {new_pr.html_url}"
     except Exception as e:
         return f"Failed to create pull request: {str(e)}"
 
@@ -120,3 +147,44 @@ def github_create_pull_request(title: str, body: str, head_branch: str, base_bra
 def system_health_check() -> str:
     """Verifies that local workspace and dependencies are operational."""
     return f"HabitatAI operational. FS_ROOT mounted at: {FS_ROOT}"
+
+@tool
+def github_commit_file(
+    file_path: str,
+    content: str,
+    commit_message: str,
+    branch_name: str
+) -> str:
+    """Creates a new branch (if not existing) and commits a file update directly to GitHub."""
+    try:
+        repo = _get_github_repo()
+        default_branch = repo.default_branch
+        base_ref = repo.get_git_ref(f"heads/{default_branch}")
+        
+        # Ensure target branch exists
+        try:
+            repo.get_git_ref(f"heads/{branch_name}")
+        except Exception:
+            repo.create_git_ref(ref=f"refs/heads/{branch_name}", sha=base_ref.object.sha)
+
+        # Check if file exists on target branch to update or create
+        try:
+            existing_file = repo.get_contents(file_path, ref=branch_name)
+            repo.update_file(
+                path=file_path,
+                message=commit_message,
+                content=content,
+                sha=existing_file.sha,
+                branch=branch_name
+            )
+            return f"Updated {file_path} on branch {branch_name}"
+        except Exception:
+            repo.create_file(
+                path=file_path,
+                message=commit_message,
+                content=content,
+                branch=branch_name
+            )
+            return f"Created {file_path} on branch {branch_name}"
+    except Exception as e:
+        return f"Failed to commit file to branch: {str(e)}"

@@ -9,15 +9,21 @@ from src.tools.custom_tools import (
 )
 
 SUPPORT_SYSTEM_PROMPT = """You are the HabitatAI Support Agent.
-Your role is local developer unblocking and repository diagnostics:
-1. Inspect local configuration and source code using 'read_local_file' and 'list_local_directory'.
-2. Check Git status/diffs using Git MCP tools.
-3. Retrieve setup instructions and architectural rules via 'search_codebase_knowledge'.
+Your responsibility is diagnostic triaging, developer unblocking, and environment health:
+
+Operational Guidelines:
+1. Diagnose repository issues, inspect file trees, and view file contents using 'read_local_file' and 'list_local_directory'.
+2. Use Git MCP tools (e.g., git status, git diff, git log) to inspect uncommitted changes, branches, or working-tree health.
+3. Perform environment checks using 'system_health_check'.
+4. Retrieve repository runbooks, architecture constraints, and setup documentation using 'search_codebase_knowledge'.
+5. Always provide clear, actionable root-cause diagnoses rather than raw dumps of diagnostic output.
 """
+
 
 async def build_support_agent(model_name: str = "gemma-4-26b-a4b-it"):
     llm = ChatGoogleGenerativeAI(model=model_name, temperature=0.0)
-    
+
+    # Git tools loaded via native MCP configuration
     git_tools = await get_mcp_tools(["git"])
     rag_tool = get_codebase_retriever_tool()
 

@@ -4,8 +4,9 @@ from .custom_tools import (
     list_local_directory,
     github_list_issues,
     github_create_issue,
-    github_create_pull_request,
     system_health_check,
+    github_create_pull_request,
+    github_commit_file,
 )
 from .mcp_loader import get_mcp_tools
 
