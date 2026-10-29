@@ -1,73 +1,66 @@
+import truststore
+truststore.inject_into_ssl()
+
 import asyncio
 from dotenv import load_dotenv
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import PromptTemplate
-from langchain_google_genai import ChatGoogleGenerativeAI
-from src.agents import (
-    build_developer_agent,
-    build_refactor_agent,
-    build_support_agent,
-)
+from langchain_core.messages import HumanMessage
+from src.graph.workflow import create_sdlc_graph, _get_text_content
 
 load_dotenv()
 
-ROUTER_PROMPT = PromptTemplate.from_template(
-    """Classify the following software engineering task into exactly one category:
-- 'developer': Implementing new features, fixing tickets, opening PRs, GitHub issue workflows.
-- 'support': Debugging local environments, dependency issues, build failures, runbook questions.
-- 'refactor': Identifying technical debt, dead code cleanup, modernizing legacy packages.
-
-Respond with ONLY the category name ('developer', 'support', or 'refactor').
-
-Task: {task}
-Category:"""
-)
-
 
 async def main():
-    print("Initializing HabitatAI Gemini agents...")
+    print("=" * 60)
+    print("  HabitatAI: Multi-Agent Autonomous SDLC Assistant")
+    print("  (Stateless Mode | Fast-Fail Active)")
+    print("  Type 'exit' or 'quit' to terminate")
+    print("=" * 60)
 
-    developer_executor = await build_developer_agent()
-    support_executor = await build_support_agent()
-    refactor_executor = await build_refactor_agent()
+    print("\nInitializing orchestrator graph and compiling agents...")
+    graph = await create_sdlc_graph()
+    print("All agents online and graph compiled. Ready.\n")
 
-    router_chain = (
-        ROUTER_PROMPT
-        | ChatGoogleGenerativeAI(model="gemma-4-26b-a4b-it", temperature=0.0)
-        | StrOutputParser()
-    )
+    while True:
+        try:
+            user_input = input("You > ").strip()
+            if not user_input:
+                continue
+            if user_input.lower() in ["exit", "quit", "q"]:
+                print("Shutting down HabitatAI session. Goodbye!")
+                break
 
-    agent_registry = {
-        "developer": developer_executor,
-        "support": support_executor,
-        "refactor": refactor_executor,
-    }
+            current_messages = [HumanMessage(content=user_input)]
 
-    print("✅ All agents online. Running diagnostic test query...\n")
+            print("\n[Routing & Executing...]")
+            active_node = "agent"
+            result_messages = []
 
-    test_query = "My build fails with an import error when loading chroma_db. Check our codebase and help me resolve it."
+            async for chunk in graph.astream(
+                {"messages": current_messages}, 
+                stream_mode="updates"
+            ):
+                for node_name, state_update in chunk.items():
+                    active_node = node_name
+                    print(f"  ↳ Finished Node: [{node_name.upper()}]")
+                    if "messages" in state_update:
+                        result_messages = state_update["messages"]
 
-    category = (await router_chain.ainvoke({"task": test_query})).strip().lower()
-    selected_agent = agent_registry.get(category, support_executor)
+            if result_messages:
+                last_msg = result_messages[-1]
+                content_str = _get_text_content(last_msg)
 
-    print(f"\n[Router] Task routed to: {category.upper()} AGENT")
-    response = await selected_agent.ainvoke(
-        {"messages": [("user", test_query)]}
-    )
+                print(f"\n[{active_node.upper()} AGENT RESPONSE]")
+                print("-" * 60)
+                print(content_str)
+                print("-" * 60 + "\n")
+            else:
+                print("\n[Notice]: Task completed without returning response messages.\n")
 
-    last_message = response["messages"][-1]
-
-    if isinstance(last_message.content, list):
-        final_text = "".join(
-            block.get("text", "")
-            for block in last_message.content
-            if isinstance(block, dict) and block.get("type") == "text"
-        )
-    else:
-        final_text = last_message.content
-
-    print("\n--- Response ---")
-    print(final_text)
+        except KeyboardInterrupt:
+            print("\nSession interrupted. Exiting...")
+            break
+        except Exception as e:
+            print(f"\n[Execution Error]: {str(e)}\n")
 
 
 if __name__ == "__main__":

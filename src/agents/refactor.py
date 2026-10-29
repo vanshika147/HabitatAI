@@ -19,10 +19,10 @@ Your role is continuous repository health and technical debt reduction:
 """
 
 
-async def build_refactor_agent(model_name: str = "gemma-4-26b-a4b-it"):
-    llm = ChatGoogleGenerativeAI(model=model_name, temperature=0.1)
+async def build_refactor_agent(model_name: str = "gemini-3.5-flash"):
+    llm = ChatGoogleGenerativeAI(model=model_name, temperature=0.0, max_retries = 2,  
+        timeout=30.0)
 
-    # Load Python-based git MCP tools
     git_tools = await get_mcp_tools(["git"])
     rag_tool = get_codebase_retriever_tool()
 

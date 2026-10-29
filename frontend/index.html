@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HabitatAI — Multi-Agent SDLC Dashboard</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --bg-cream: #f4f6f0;
+      --card-bg: #ffffff;
+      --accent-green: #11553e;
+      --border-subtle: #e5e9df;
+    }
+    body {
+      background-color: var(--bg-cream);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #27272a;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex text-sm antialiased">
+
+  <aside class="w-64 border-r border-[#e5e9df] bg-[#fbfcf9] p-5 flex flex-col justify-between hidden md:flex shrink-0">
+    <div>
+      <div class="flex items-center gap-2.5 mb-7">
+        <div class="w-8 h-8 rounded-full bg-[#11553e] flex items-center justify-center text-white">
+          <i data-lucide="bot" class="w-5 h-5"></i>
+        </div>
+        <span class="font-bold text-lg text-zinc-900 tracking-tight">HabitatAI</span>
+      </div>
+
+      <div class="mb-6">
+        <p class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">Repository</p>
+        <div class="bg-white border border-[#e5e9df] rounded-xl p-3 shadow-xs">
+          <div class="flex items-center justify-between">
+            <span class="font-medium text-xs text-zinc-800 truncate" id="activeRepoTitle">PurePill-habitatAI</span>
+            <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5 text-zinc-400 shrink-0"></i>
+          </div>
+          <span class="text-[11px] text-zinc-400 block mb-2">test-habitatai</span>
+          <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#e8f3ee] text-[#11553e] text-[11px] font-medium">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#11553e]"></span>
+            <span>habitat-dev</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="space-y-1 mb-6">
+        <button class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white border border-[#e5e9df] text-zinc-900 font-semibold shadow-xs">
+          <i data-lucide="layout-grid" class="w-4 h-4 text-[#11553e]"></i>
+          <span>Overview</span>
+        </button>
+      </nav>
+
+      <div>
+        <p class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">Agents</p>
+        <ul class="space-y-1 text-xs">
+          <li class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-100 transition cursor-pointer" onclick="openAgentDrawer('developer')">
+            <span class="flex items-center gap-2 text-zinc-700">
+              <i data-lucide="git-pull-request" class="w-4 h-4 text-emerald-600"></i> Developer
+            </span>
+            <span class="text-[11px] text-zinc-400">ready</span>
+          </li>
+          <li class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-100 transition cursor-pointer" onclick="openAgentDrawer('support')">
+            <span class="flex items-center gap-2 text-zinc-700">
+              <i data-lucide="activity" class="w-4 h-4 text-blue-600"></i> Support
+            </span>
+            <span class="text-[11px] text-zinc-400">ready</span>
+          </li>
+          <li class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-100 transition cursor-pointer" onclick="openAgentDrawer('refactor')">
+            <span class="flex items-center gap-2 text-zinc-700">
+              <i data-lucide="repeat" class="w-4 h-4 text-amber-600"></i> Refactor
+            </span>
+            <span class="text-[11px] text-zinc-400">ready</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="border-t border-[#e5e9df] pt-4 text-[11px] text-zinc-400 flex items-center justify-between">
+      <span class="flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        gemini-3.1-flash-lite
+      </span>
+      <span>v0.4.2</span>
+    </div>
+  </aside>
+
+  <main class="flex-1 p-6 md:p-8 max-w-6xl mx-auto overflow-y-auto custom-scroll">
+    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div>
+        <p class="text-xs text-zinc-500 mb-1">test-habitatai / PurePill-habitatAI</p>
+        <h1 class="text-2xl font-bold text-zinc-900 tracking-tight">Overview</h1>
+        <p class="text-xs text-zinc-500 mt-1">Three agents are connected to this repository. Ask for what you need, or open an agent's workspace.</p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="bg-white border border-[#e5e9df] px-3 py-1.5 rounded-full text-xs text-zinc-600 shadow-2xs font-mono">
+          habitat-dev &rarr; main
+        </div>
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#e5e9df] text-xs text-emerald-800 shadow-2xs">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          Connected
+        </div>
+      </div>
+    </header>
+
+    <section class="bg-white border border-[#e5e9df] rounded-2xl p-5 shadow-xs mb-8">
+      <h2 class="font-bold text-zinc-900 text-sm mb-1">Ask HabitatAI</h2>
+      <p class="text-xs text-zinc-500 mb-4">Describe the job. The orchestrator reads it and hands it to the right agent.</p>
+
+      <form id="orchestratorForm" class="flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-1">
+          <input
+            id="taskPrompt"
+            type="text"
+            placeholder="For example: add a /healthz endpoint and open a pull request"
+            class="w-full px-4 py-2.5 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#11553e] text-xs transition"
+            required
+          />
+        </div>
+        <button
+          type="submit"
+          id="routeBtn"
+          class="bg-[#11553e] hover:bg-[#0c402e] text-white px-5 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition shadow-xs"
+        >
+          <span>Route request</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </button>
+      </form>
+
+      <div class="mt-4 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+        <span class="text-[11px] font-semibold text-zinc-400">Try</span>
+        <button onclick="fillSuggestion('Add a /healthz endpoint and open a PR')" class="px-2.5 py-1 rounded-lg bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 transition">
+          Add a /healthz endpoint <span class="text-emerald-700 font-medium">&rarr; Developer</span>
+        </button>
+        <button onclick="fillSuggestion('Check the repository health and inspect the local working directory')" class="px-2.5 py-1 rounded-lg bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 transition">
+          Why won't the app start? <span class="text-blue-700 font-medium">&rarr; Support</span>
+        </button>
+        <button onclick="fillSuggestion('Add docstrings and type hints to run.py')" class="px-2.5 py-1 rounded-lg bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 transition">
+          Add docstrings to run.py <span class="text-amber-700 font-medium">&rarr; Refactor</span>
+        </button>
+      </div>
+
+      <div id="executionConsole" class="mt-4 hidden p-3 rounded-xl bg-zinc-950 text-zinc-100 font-mono text-[11px] space-y-1">
+        <div class="text-zinc-500 flex items-center justify-between border-b border-zinc-800 pb-1 mb-1">
+          <span>Orchestrator Execution Stream</span>
+          <span id="execTimer">0.0s</span>
+        </div>
+        <div id="consoleLogs"></div>
+      </div>
+    </section>
+
+    <section class="mb-8">
+      <h3 class="font-bold text-zinc-800 text-sm mb-4">Your agents</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+        <!-- Developer Agent Card -->
+        <div class="bg-white border border-[#e5e9df] rounded-2xl p-5 shadow-xs flex flex-col justify-between hover:border-emerald-300 transition">
+          <div>
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                <i data-lucide="git-pull-request" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-zinc-900 text-sm">Developer</h4>
+                <span class="text-[10px] text-zinc-400">ReAct Agent</span>
+              </div>
+            </div>
+            <p class="text-xs text-zinc-500 mb-4 leading-relaxed">
+              Builds features, commits to habitat-dev and opens pull requests.
+            </p>
+          </div>
+          <div>
+            <div class="border-t border-zinc-100 pt-3 mb-3">
+              <span class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">LAST RUN &bull; 2H AGO</span>
+              <span class="text-xs text-zinc-700 font-medium line-clamp-1">Opened pull request #4: Add /healthz endpoint</span>
+            </div>
+            <button onclick="openAgentDrawer('developer')" class="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-emerald-600 text-emerald-800 text-xs font-semibold hover:bg-emerald-50 transition">
+              <span>Open workspace</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Support Agent Card -->
+        <div class="bg-white border border-[#e5e9df] rounded-2xl p-5 shadow-xs flex flex-col justify-between hover:border-blue-300 transition">
+          <div>
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
+                <i data-lucide="activity" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-zinc-900 text-sm">Support</h4>
+                <span class="text-[10px] text-zinc-400">Diagnostics Agent</span>
+              </div>
+            </div>
+            <p class="text-xs text-zinc-500 mb-4 leading-relaxed">
+              Diagnoses setup problems and explains how the code fits together.
+            </p>
+          </div>
+          <div>
+            <div class="border-t border-zinc-100 pt-3 mb-3">
+              <span class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">LAST RUN &bull; 35 MIN AGO</span>
+              <span class="text-xs text-zinc-700 font-medium line-clamp-1">Health check passed, working tree clean</span>
+            </div>
+            <button onclick="openAgentDrawer('support')" class="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-blue-600 text-blue-800 text-xs font-semibold hover:bg-blue-50 transition">
+              <span>Open workspace</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Refactor Agent Card -->
+        <div class="bg-white border border-[#e5e9df] rounded-2xl p-5 shadow-xs flex flex-col justify-between hover:border-amber-300 transition">
+          <div>
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+                <i data-lucide="repeat" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-zinc-900 text-sm">Refactor</h4>
+                <span class="text-[10px] text-zinc-400">AST Analysis Agent</span>
+              </div>
+            </div>
+            <p class="text-xs text-zinc-500 mb-4 leading-relaxed">
+              Finds dead code, missing docstrings and missing type hints.
+            </p>
+          </div>
+          <div>
+            <div class="border-t border-zinc-100 pt-3 mb-3">
+              <span class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">LAST RUN &bull; YESTERDAY</span>
+              <span class="text-xs text-zinc-700 font-medium line-clamp-1">Staged docstring fixes for run.py</span>
+            </div>
+            <button onclick="openAgentDrawer('refactor')" class="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-amber-600 text-amber-800 text-xs font-semibold hover:bg-amber-50 transition">
+              <span>Open workspace</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <section class="lg:col-span-2 bg-white border border-[#e5e9df] rounded-2xl p-5 shadow-xs">
+        <h3 class="font-bold text-zinc-900 text-sm mb-4">Recent activity</h3>
+        <ul id="activityFeed" class="space-y-3.5 text-xs">
+        </ul>
+      </section>
+
+      <section class="bg-white border border-[#e5e9df] rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+        <div>
+          <h3 class="font-bold text-zinc-900 text-sm mb-4">Repository</h3>
+          
+          <div class="space-y-4 text-xs">
+            <div>
+              <span class="text-zinc-400 text-[11px] block">Working branch</span>
+              <span id="repoWorkingBranch" class="font-mono font-medium text-zinc-800">
+                Loading branch...
+              </span>
+            </div>
+
+            <div>
+              <span class="text-zinc-400 text-[11px] block">Latest Commit / PR</span>
+              <span id="repoLatestCommit" class="font-medium text-zinc-800 line-clamp-2">
+                Scanning...
+              </span>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between text-[11px] mb-1">
+                <span class="text-zinc-400">Knowledge index</span>
+                <span id="repoIndexState" class="text-emerald-700 font-medium">checking</span>
+              </div>
+              <div class="w-full bg-zinc-100 rounded-full h-1.5 overflow-hidden">
+                <div class="bg-[#11553e] h-1.5 rounded-full w-full"></div>
+              </div>
+              <span id="repoChromaStatus" class="text-[10px] text-zinc-400 block mt-1">
+                Checking index...
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t border-zinc-100 pt-4 mt-6">
+          <span class="text-zinc-400 text-[11px] block">Sandbox root</span>
+          <span id="repoSandboxRoot" class="font-mono text-[11px] text-zinc-600 truncate block">
+            Loading path...
+          </span>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div id="drawerOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 hidden transition-opacity" onclick="closeAgentDrawer()"></div>
+  <aside id="agentDrawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 p-6 flex flex-col justify-between overflow-y-auto">
+    <div>
+      <div class="flex items-center justify-between pb-4 border-b border-zinc-100 mb-5">
+        <div class="flex items-center gap-2.5">
+          <div id="drawerIcon" class="w-8 h-8 rounded-lg flex items-center justify-center"></div>
+          <div>
+            <h4 id="drawerTitle" class="font-bold text-sm text-zinc-900">Agent Workspace</h4>
+            <span id="drawerSubtitle" class="text-[11px] text-zinc-400"></span>
+          </div>
+        </div>
+        <button onclick="closeAgentDrawer()" class="text-zinc-400 hover:text-zinc-600 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div>
+          <span class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">Assigned Tools</span>
+          <div id="drawerTools" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <div>
+          <span class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">Agent Prompt & Scope</span>
+          <p id="drawerPrompt" class="bg-zinc-50 p-3 rounded-xl border border-zinc-200 text-zinc-700 leading-relaxed font-mono text-[11px]"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="border-t border-zinc-100 pt-4">
+      <button onclick="closeAgentDrawer()" class="w-full py-2.5 bg-zinc-900 text-white text-xs font-semibold rounded-xl hover:bg-zinc-800 transition">
+        Close Workspace
+      </button>
+    </div>
+  </aside>
+
+  <script src="app.js"></script>
+</body>
+</html>

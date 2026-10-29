@@ -27,8 +27,9 @@ Branching & Collaboration Strategy:
 5. In your final report, provide the exact branch name ('habitat-dev'), committed files, and relevant issue/PR URLs.
 """
 
-async def build_developer_agent(model_name: str = "gemma-4-26b-a4b-it"):
-    llm = ChatGoogleGenerativeAI(model=model_name, temperature=0.1)
+async def build_developer_agent(model_name: str = "gemini-3.5-flash"):
+    llm = ChatGoogleGenerativeAI(model=model_name, temperature=0.0, max_retries = 2, 
+        timeout=30.0)
     rag_tool = get_codebase_retriever_tool()
     
     tools = [

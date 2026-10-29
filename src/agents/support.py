@@ -20,10 +20,10 @@ Operational Guidelines:
 """
 
 
-async def build_support_agent(model_name: str = "gemma-4-26b-a4b-it"):
-    llm = ChatGoogleGenerativeAI(model=model_name, temperature=0.0)
+async def build_support_agent(model_name: str = "gemini-3.5-flash"):
+    llm = ChatGoogleGenerativeAI(model=model_name, temperature=0.0, max_retries = 2,  
+        timeout=30.0)
 
-    # Git tools loaded via native MCP configuration
     git_tools = await get_mcp_tools(["git"])
     rag_tool = get_codebase_retriever_tool()
 

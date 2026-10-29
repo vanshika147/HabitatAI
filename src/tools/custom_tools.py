@@ -28,6 +28,7 @@ def _resolve_safe_path(relative_path: str) -> Path:
 @tool
 def read_local_file(relative_path: str) -> str:
     """Reads content of a file within the local PurePill-habitatAI repository."""
+    print(f"    [TOOL CALL] Reading file: {relative_path}")
     try:
         path = _resolve_safe_path(relative_path)
         if not path.is_file():
@@ -113,12 +114,12 @@ def github_create_pull_request(
     base_branch: str = "main",
 ) -> str:
     """Creates a pull request or returns the active pull request if one is already open for head_branch."""
+    print(f"    [TOOL CALL] Managing PR for {head_branch} -> {base_branch}...")
     try:
         repo = _get_github_repo()
         owner = repo.owner.login
         head_ref = f"{owner}:{head_branch}" if ":" not in head_branch else head_branch
 
-        # Check if an open PR already exists for this head branch
         open_prs = repo.get_pulls(state="open", base=base_branch)
         for pr in open_prs:
             if pr.head.ref == head_branch or pr.head.label == head_ref:
@@ -128,7 +129,6 @@ def github_create_pull_request(
                     "are automatically tracked."
                 )
 
-        # If no active PR, create a new one
         try:
             new_pr = repo.create_pull(
                 title=title, body=body, head=head_ref, base=base_branch
@@ -156,18 +156,17 @@ def github_commit_file(
     branch_name: str
 ) -> str:
     """Creates a new branch (if not existing) and commits a file update directly to GitHub."""
+    print(f"    [TOOL CALL] Committing '{file_path}' to branch '{branch_name}' via GitHub API...")
     try:
         repo = _get_github_repo()
         default_branch = repo.default_branch
         base_ref = repo.get_git_ref(f"heads/{default_branch}")
         
-        # Ensure target branch exists
         try:
             repo.get_git_ref(f"heads/{branch_name}")
         except Exception:
             repo.create_git_ref(ref=f"refs/heads/{branch_name}", sha=base_ref.object.sha)
 
-        # Check if file exists on target branch to update or create
         try:
             existing_file = repo.get_contents(file_path, ref=branch_name)
             repo.update_file(
